@@ -42,7 +42,7 @@ You can either use the existing terminal or open a new terminal in VS Code, ensu
 ## Step 8: View Docker Logs
 Run the following command to view the logs of the server:
 ```bash
-docker-compose logs -f
+docker compose logs -f
 ```
 Make sure to adjust the server name according to the upstream backends defined in your `nginx.conf`.
 
