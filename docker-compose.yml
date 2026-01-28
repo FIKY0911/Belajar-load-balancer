@@ -1,0 +1,72 @@
+services:
+  nginx:
+    image: nginx
+    # Menggunakan image resmi NGINX sebagai load balancer
+
+    container_name: nginx_lb
+    # Nama container agar mudah dikenali dan dipanggil
+
+    ports:
+      - "9999:9999"
+      # Mapping port:
+      # host:9999 → container:9999
+      # Semua request ke localhost:9999 masuk ke NGINX
+
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # Mount file konfigurasi nginx.conf dari host ke container
+      # Mode read-only (ro) untuk keamanan
+
+    depends_on:
+      - server-1
+      - server-2
+      - server-3
+      # Menjamin container backend dijalankan lebih dulu
+      # BUKAN health-check, hanya urutan start
+
+    networks:
+      - lb_network
+      # Menghubungkan NGINX ke network yang sama dengan backend
+
+  server-1:
+    image: ealen/echo-server:latest
+    # Backend server sederhana untuk testing (echo response)
+
+    container_name: backend_1
+    # Nama container backend pertama
+
+    restart: always
+    # Container otomatis restart jika crash / berhenti
+
+    networks:
+      - lb_network
+      # Terhubung ke network yang sama agar bisa diakses NGINX
+
+  server-2:
+    image: ealen/echo-server:latest
+    # Backend server kedua
+
+    container_name: backend_2
+
+    restart: always
+
+    networks:
+      - lb_network
+
+  server-3:
+    image: ealen/echo-server:latest
+    # Backend server ketiga
+
+    container_name: backend_3
+
+    restart: always
+
+    networks:
+      - lb_network
+
+networks:
+  lb_network:
+    driver: bridge
+    # Network bridge default Docker
+    # Semua container bisa saling resolve hostname:
+    # server-1, server-2, server-3
